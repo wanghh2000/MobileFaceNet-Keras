@@ -5,6 +5,7 @@ Created on Thu Apr 25 10:58:15 2019
 @author: TMaysGGS
 """
 
+'''Last updated on 08/05/2019 19:52'''
 '''Importing the libraries'''
 import math
 # import pandas as pd
@@ -19,17 +20,19 @@ from keras.engine.topology import Layer
 from keras.optimizers import Adam
 from keras import initializers
 
-os.environ['CUDA_VISIBLE_DEVICES']='3'
+os.environ['CUDA_VISIBLE_DEVICES']='1'
 
-BATCH_SIZE = 128
-m = 72360
+BATCH_SIZE = 256
+NUM_LABELS = 26928 
+m = 6151666 
+DATA_SPLIT = 0.008
 
 '''Importing the data set'''
 from keras.preprocessing.image import ImageDataGenerator
 
 train_path = '/data/daiwei/dataset/'
 
-train_datagen = ImageDataGenerator(rescale = 1. / 255, validation_split = 0.03)
+train_datagen = ImageDataGenerator(rescale = 1. / 255, validation_split = DATA_SPLIT)
 
 def mobilefacenet_input_generator(generator, directory, subset):
     
@@ -184,7 +187,7 @@ class ArcFaceLossLayer(Layer):
 def mobile_face_net():
     
     X = Input(shape = (112, 112, 3))
-    label = Input((320, ))
+    label = Input((NUM_LABELS, ))
 
     M = conv_block(X, 64, 3, 2)
 
@@ -208,8 +211,9 @@ def mobile_face_net():
     M = Dropout(rate = 0.1)(M)
     M = Flatten()(M)
     
-    M = ArcFaceLossLayer(class_num = 320)([M, label])
-    Z_L = Dense(320, activation = 'softmax')(M) 
+    M = Dense(128, activation = None, use_bias = False, kernel_initializer = 'glorot_normal')(M) 
+    
+    Z_L = ArcFaceLossLayer(class_num = NUM_LABELS)([M, label])
     
     model = Model(inputs = [X, label], outputs = Z_L, name = 'mobile_face_net')
     
@@ -229,7 +233,7 @@ model.compile(optimizer = Adam(lr = 0.001, epsilon = 1e-8), loss = 'categorical_
 
 # Save the model after every epoch
 from keras.callbacks import ModelCheckpoint 
-check_pointer = ModelCheckpoint(filepath = 'model.hdf5', verbose = 1, save_best_only = True)
+check_pointer = ModelCheckpoint(filepath = 'MobileFaceNet.h5', verbose = 1, save_best_only = True)
 
 # Interrupt the training when the validation loss is not decreasing
 from keras.callbacks import EarlyStopping
@@ -257,10 +261,10 @@ reduce_lr = ReduceLROnPlateau(monitor = 'val_loss', factor = 0.2, patience = 200
 
 hist = model.fit_generator(
         train_generator,
-        steps_per_epoch = (m * 0.97) // BATCH_SIZE,
+        steps_per_epoch = (m * DATA_SPLIT) // BATCH_SIZE,
         epochs = 10000,
         callbacks = [check_pointer, early_stopping, history, csv_logger, reduce_lr],
         validation_data = validate_generator, 
-        validation_steps = (m * 0.03) // BATCH_SIZE)
+        validation_steps = (m * DATA_SPLIT) // BATCH_SIZE)
 
 print(hist.history)
