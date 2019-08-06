@@ -20,7 +20,7 @@ b. Resize the image to 112 x 112
 (4) PS: The OpenCV ops in Python run really slow and all the operations above have a quite similar code implementation in C++. Thus it is recommended to use C++ for prerocessing the image dataset. 
 
 ## 2. Training Strategy  
-The GPU memory is not enough for mini-batch size 512 for training on a Nvidia 2080 Ti, thus I have to downsize it to 256.  
+The GPU memory is not enough for mini-batch size 512 (as did in the original paper) for training on a Nvidia 2080 Ti, thus I have to downsize it to 128 to fit in the memory.  
   
 ## 3. Improvement for training step in progress.  
 
