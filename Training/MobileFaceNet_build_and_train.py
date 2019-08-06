@@ -5,7 +5,7 @@ Created on Thu Apr 25 10:58:15 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 08/05/2019 19:52'''
+'''Last updated on 08/06/2019 09:40'''
 '''Importing the libraries'''
 import math
 # import pandas as pd
@@ -22,7 +22,7 @@ from keras import initializers
 
 os.environ['CUDA_VISIBLE_DEVICES']='1'
 
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 NUM_LABELS = 26928 
 m = 6151666 
 DATA_SPLIT = 0.008
@@ -261,7 +261,7 @@ reduce_lr = ReduceLROnPlateau(monitor = 'val_loss', factor = 0.2, patience = 200
 
 hist = model.fit_generator(
         train_generator,
-        steps_per_epoch = (m * DATA_SPLIT) // BATCH_SIZE,
+        steps_per_epoch = (m * (1 - DATA_SPLIT)) // BATCH_SIZE,
         epochs = 10000,
         callbacks = [check_pointer, early_stopping, history, csv_logger, reduce_lr],
         validation_data = validate_generator, 
