@@ -5,7 +5,7 @@ Created on Thu Apr 25 10:58:15 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 08/06/2019 09:40'''
+'''Last updated on 10/22/2019 10:50'''
 '''Importing the libraries'''
 import math
 # import pandas as pd
@@ -20,7 +20,7 @@ from keras.engine.topology import Layer
 from keras.optimizers import Adam
 from keras import initializers
 
-os.environ['CUDA_VISIBLE_DEVICES']='1'
+os.environ['CUDA_VISIBLE_DEVICES']='3'
 
 BATCH_SIZE = 128
 NUM_LABELS = 26928 
@@ -54,11 +54,11 @@ train_generator = mobilefacenet_input_generator(train_datagen, train_path, 'trai
 validate_generator = mobilefacenet_input_generator(train_datagen, train_path, 'validation')
 
 '''Building Block Functions'''
-def conv_block(inputs, filters, kernel_size, strides):
+def conv_block(inputs, filters, kernel_size, strides, padding):
     
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     
-    Z = Conv2D(filters, kernel_size, padding = "valid", strides = strides)(inputs)
+    Z = Conv2D(filters, kernel_size, strides = strides, padding = padding, use_bias = False)(inputs)
     Z = BatchNormalization(axis = channel_axis)(Z)
     A = PReLU()(Z)
     
@@ -68,7 +68,7 @@ def separable_conv_block(inputs, filters, kernel_size, strides):
     
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     
-    Z = SeparableConv2D(filters = 64, kernel_size = 3, strides = (1, 1), padding = "same")(inputs)
+    Z = SeparableConv2D(filters, kernel_size, strides = strides, padding = "same", use_bias = False)(inputs)
     Z = BatchNormalization(axis = channel_axis)(Z)
     A = PReLU()(Z)
     
@@ -79,13 +79,13 @@ def bottleneck(inputs, filters, kernel, t, s, r = False):
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     tchannel = K.int_shape(inputs)[channel_axis] * t
     
-    Z1 = conv_block(inputs, tchannel, (1, 1), (1, 1))
+    Z1 = conv_block(inputs, tchannel, 1, s, 'same')
     
-    Z1 = DepthwiseConv2D(kernel_size = kernel, strides = s, padding = "same", depth_multiplier = 1)(Z1)
+    Z1 = DepthwiseConv2D(kernel, strides = 1, padding = "same", depth_multiplier = 1, use_bias = False)(Z1)
     Z1 = BatchNormalization(axis = channel_axis)(Z1)
     A1 = PReLU()(Z1)
     
-    Z2 = Conv2D(filters, kernel_size = 1, strides = 1, padding = "same")(A1)
+    Z2 = Conv2D(filters, 1, strides = 1, padding = "same", use_bias = False)(A1)
     Z2 = BatchNormalization(axis = channel_axis)(Z2)
     
     if r:
@@ -106,7 +106,7 @@ def linear_GD_conv_block(inputs, kernel_size, strides):
     
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     
-    Z = DepthwiseConv2D(kernel_size = kernel_size, strides = strides, padding = "valid", depth_multiplier = 1)(inputs)
+    Z = DepthwiseConv2D(kernel_size, strides = strides, padding = "valid", depth_multiplier = 1, use_bias = False)(inputs)
     Z = BatchNormalization(axis = channel_axis)(Z)
     
     return Z
@@ -189,25 +189,26 @@ def mobile_face_net():
     X = Input(shape = (112, 112, 3))
     label = Input((NUM_LABELS, ))
 
-    M = conv_block(X, 64, 3, 2)
+    M = conv_block(X, 64, 3, 2, 'same') # Output Shape: (56, 56, 64) 
 
-    M = separable_conv_block(M, 64, 3, 1)
+    M = separable_conv_block(M, 64, 3, 1) # (56, 56, 64) 
     
-    M = inverted_residual_block(M, 64, 3, t = 2, strides = 2, n = 5)
+    M = inverted_residual_block(M, 64, 3, t = 2, strides = 2, n = 5) # (28, 28, 64) 
     
-    M = inverted_residual_block(M, 128, 3, t = 4, strides = 2, n = 1)
+    M = inverted_residual_block(M, 128, 3, t = 4, strides = 2, n = 1) # (14, 14, 128) 
     
-    M = inverted_residual_block(M, 128, 3, t = 2, strides = 1, n = 6)
+    M = inverted_residual_block(M, 128, 3, t = 2, strides = 1, n = 6) # (14, 14, 128) 
     
-    M = inverted_residual_block(M, 128, 3, t = 4, strides = 2, n = 1)
+    M = inverted_residual_block(M, 128, 3, t = 4, strides = 2, n = 1) # (7, 7, 128) 
     
-    M = inverted_residual_block(M, 128, 3, t = 2, strides = 1, n = 2)
+    M = inverted_residual_block(M, 128, 3, t = 2, strides = 1, n = 2) # (7, 7, 128) 
     
-    M = conv_block(M, 512, 1, 1)
+    M = conv_block(M, 512, 1, 1, 'valid') # (7, 7, 512) 
     
-    M = linear_GD_conv_block(M, 7, 1) # kernel_size = 7 for 112 x 112; 4 for 64 x 64
+    M = linear_GD_conv_block(M, 7, 1) # (1, 1, 512) 
+    # kernel_size = 7 for 112 x 112; 4 for 64 x 64
     
-    M = conv_block(M, 128, 1, 1)
+    M = conv_block(M, 128, 1, 1, 'valid')
     M = Dropout(rate = 0.1)(M)
     M = Flatten()(M)
     
@@ -233,7 +234,7 @@ model.compile(optimizer = Adam(lr = 0.001, epsilon = 1e-8), loss = 'categorical_
 
 # Save the model after every epoch
 from keras.callbacks import ModelCheckpoint 
-check_pointer = ModelCheckpoint(filepath = 'MobileFaceNet.h5', verbose = 1, save_best_only = True)
+check_pointer = ModelCheckpoint(filepath = '../Models/MobileFaceNet_train.h5', verbose = 1, save_best_only = True)
 
 # Interrupt the training when the validation loss is not decreasing
 from keras.callbacks import EarlyStopping
