@@ -22,7 +22,7 @@ The GPU memory is not enough for mini-batch size 512 (as did in the original pap
   
 ## 3. Improvement for training step in progress.  
 
-## Reference  
+## References  
 (1) Original paper of MobileFaceNet: [MobileFaceNet](https://arxiv.org/abs/1804.07573)  
 (2) The idea of the implementation of model structure is from MobileNet v2: [xiaochus/MobileNetV2](https://github.com/xiaochus/MobileNetV2)  
 (3) The implementation of ArcFace loss (InsightFace loss) is from: [ewrfcas/ArcFace_loss](https://github.com/ewrfcas/Machine-Learning-Toolbox/blob/127d6e5d336614d1efb21e78865501435cdb7b8b/loss_function/ArcFace_loss.py)  
