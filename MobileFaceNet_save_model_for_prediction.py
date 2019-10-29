@@ -5,7 +5,7 @@ Created on Mon May 13 14:39:29 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 09/23/2019 10:23'''
+'''Last updated on 10/28/2019 09:09'''
 '''Importing the libraries'''
 import math
 import tensorflow as tf
@@ -146,7 +146,7 @@ class ArcFaceLossLayer(Layer):
     
     def compute_output_shape(self, input_shape):
         
-        return input_shape[0], self.class_num
+        return input_shape[0], self.class_num 
 
 '''Building the MobileFaceNet Model'''
 def mobile_face_net():
