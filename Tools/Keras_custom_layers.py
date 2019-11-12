@@ -5,7 +5,7 @@ Created on Tue Nov 12 13:18:31 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 11/12/2019 14:42'''
+'''Last updated on 11/12/2019 15:50'''
 import math 
 import tensorflow as tf 
 import keras.backend as K 
@@ -14,71 +14,70 @@ from keras.layers import Layer
 from keras.engine.base_layer import InputSpec 
 from keras.utils.generic_utils import to_list 
 
-# Corrected PReLU Layer (Class)
-class PReLU_Layer(Layer): 
-    
-    def __init__(self, alpha_initializer = {'class_name': 'Constant', 'config': {'value': .25}}, 
-                 alpha_regularizer = None, 
-                 alpha_constraint = None, 
-                 shared_axes = None, 
-                 **kwargs):
-        
-        super(PReLU_Layer, self).__init__(**kwargs)
-        self.supports_masking = True 
-        self.alpha_initializer = initializers.get(alpha_initializer) 
-        self.alpha_regularizer = regularizers.get(alpha_regularizer)
-        self.alpha_constraint = constraints.get(alpha_constraint) 
-        if shared_axes is None: 
-            self.shared_axes = None 
-        else:
-            self.shared_axes = to_list(shared_axes, allow_tuple = True) 
-    
-    def build(self, input_shape): 
-        
-        param_shape = [input_shape[-1]] 
-        self.param_broadcast = [False] * len(param_shape) 
-        if self.shared_axes is not None: 
-            for i in self.shared_axes:
-                param_shape[i - 1] = 1 
-                self.param_broadcast[i -1] = True 
-        self.alpha = self.add_weight(shape = param_shape, 
-                                     name = 'alpha', 
-                                     initializer = self.alpha_initializer, 
-                                     regularizer = self.alpha_regularizer, 
-                                     constraint  =self.alpha_constraint) 
-        
-        axes = {} 
-        if self.shared_axes: 
-            for i in range(1, len(input_shape)): 
-                if i not in self.shared_axes: 
-                    axes[i] = input_shape[i] 
-        self.input_spec = InputSpec(ndim = len(input_shape), axes = axes) 
-        self.build = True 
-        
-    def call(self, inputs, mask = None): 
-        
-        pos = K.relu(inputs) 
-        if K.backend() == 'tensorflow': 
-            neg = -self.alpha * K.relu(-inputs)
-        else:
-            raise Exception("Only support TensorFlow backend for now.") 
-        
-        return pos + neg 
-    
-    def get_config(self): 
-        
-        config = {
-            'alpha_regularizer': regularizers.serialize(self.alpha_regularizer),
-            'alpha_constraint': constraints.serialize(self.alpha_constraint),
-            'shared_axes': self.shared_axes
-        }
-        base_config = super(PReLU_Layer, self).get_config() 
-        
-        return dict(list(base_config.items()) + list(config.items()))
-
-    def compute_output_shape(self, input_shape): 
-        
-        return input_shape
+#class PReLU_Layer(Layer): 
+#    
+#    def __init__(self, alpha_initializer = {'class_name': 'Constant', 'config': {'value': .25}}, 
+#                 alpha_regularizer = None, 
+#                 alpha_constraint = None, 
+#                 shared_axes = None, 
+#                 **kwargs):
+#        
+#        super(PReLU_Layer, self).__init__(**kwargs)
+#        self.supports_masking = True 
+#        self.alpha_initializer = initializers.get(alpha_initializer) 
+#        self.alpha_regularizer = regularizers.get(alpha_regularizer)
+#        self.alpha_constraint = constraints.get(alpha_constraint) 
+#        if shared_axes is None: 
+#            self.shared_axes = None 
+#        else:
+#            self.shared_axes = to_list(shared_axes, allow_tuple = True) 
+#    
+#    def build(self, input_shape): 
+#        
+#        param_shape = [input_shape[-1]] 
+#        self.param_broadcast = [False] * len(param_shape) 
+#        if self.shared_axes is not None: 
+#            for i in self.shared_axes:
+#                param_shape[i - 1] = 1 
+#                self.param_broadcast[i -1] = True 
+#        self.alpha = self.add_weight(shape = param_shape, 
+#                                     name = 'alpha', 
+#                                     initializer = self.alpha_initializer, 
+#                                     regularizer = self.alpha_regularizer, 
+#                                     constraint  =self.alpha_constraint) 
+#        
+#        axes = {} 
+#        if self.shared_axes: 
+#            for i in range(1, len(input_shape)): 
+#                if i not in self.shared_axes: 
+#                    axes[i] = input_shape[i] 
+#        self.input_spec = InputSpec(ndim = len(input_shape), axes = axes) 
+#        self.build = True 
+#        
+#    def call(self, inputs, mask = None): 
+#        
+#        pos = K.relu(inputs) 
+#        if K.backend() == 'tensorflow': 
+#            neg = -self.alpha * K.relu(-inputs)
+#        else:
+#            raise Exception("Only support TensorFlow backend for now.") 
+#        
+#        return pos + neg 
+#    
+#    def get_config(self): 
+#        
+#        config = {
+#            'alpha_regularizer': regularizers.serialize(self.alpha_regularizer),
+#            'alpha_constraint': constraints.serialize(self.alpha_constraint),
+#            'shared_axes': self.shared_axes
+#        }
+#        base_config = super(PReLU_Layer, self).get_config() 
+#        
+#        return dict(list(base_config.items()) + list(config.items()))
+#
+#    def compute_output_shape(self, input_shape): 
+#        
+#        return input_shape
 
 # Arc Face Loss Layer (Class)
 class ArcFaceLossLayer(Layer):

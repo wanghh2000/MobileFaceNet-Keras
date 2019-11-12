@@ -5,19 +5,18 @@ Created on Thu Apr 25 10:58:15 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 11/12/2019 14:45'''
+'''Last updated on 11/12/2019 15:47'''
 '''Importing the libraries'''
 import os 
 import sys 
 import keras 
 from keras import backend as K
 from keras.models import Model
-from keras.layers import BatchNormalization, Conv2D, Input, SeparableConv2D, DepthwiseConv2D, add, Flatten, Dense, Dropout
+from keras.layers import Input, Conv2D, BatchNormalization, PReLU, SeparableConv2D, DepthwiseConv2D, add, Flatten, Dense, Dropout
 from keras.optimizers import Adam
 
 sys.path.append('../') 
 from Tools.Keras_custom_layers import ArcFaceLossLayer 
-from Tools.Keras_custom_layers import PReLU_Layer as PReLU 
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 
@@ -59,7 +58,7 @@ def conv_block(inputs, filters, kernel_size, strides, padding):
     
     Z = Conv2D(filters, kernel_size, strides = strides, padding = padding, use_bias = False)(inputs)
     Z = BatchNormalization(axis = channel_axis)(Z)
-    A = PReLU()(Z)
+    A = PReLU(shared_axes = [1, 2])(Z)
     
     return A
 
@@ -69,7 +68,7 @@ def separable_conv_block(inputs, filters, kernel_size, strides):
     
     Z = SeparableConv2D(filters, kernel_size, strides = strides, padding = "same", use_bias = False)(inputs)
     Z = BatchNormalization(axis = channel_axis)(Z)
-    A = PReLU()(Z)
+    A = PReLU(shared_axes = [1, 2])(Z)
     
     return A
 
@@ -82,7 +81,7 @@ def bottleneck(inputs, filters, kernel, t, s, r = False):
     
     Z1 = DepthwiseConv2D(kernel, strides = 1, padding = "same", depth_multiplier = 1, use_bias = False)(Z1)
     Z1 = BatchNormalization(axis = channel_axis)(Z1)
-    A1 = PReLU()(Z1)
+    A1 = PReLU(shared_axes = [1, 2])(Z1)
     
     Z2 = Conv2D(filters, 1, strides = 1, padding = "same", use_bias = False)(A1)
     Z2 = BatchNormalization(axis = channel_axis)(Z2)
