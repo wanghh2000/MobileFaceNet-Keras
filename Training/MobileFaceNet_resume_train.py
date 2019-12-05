@@ -5,13 +5,8 @@ Created on Mon May 13 16:54:33 2019
 @author: TMaysGGS
 """
 
-'''Updated on 11/25/2019 09:52'''
-'''Problem
-There is an intermediate layer that has the shape (m, 128), which means a 26928 * 128 matrix. 
-Each element takes 32 bit so that the total space needed is more than 21G, which way too much exceeds 
-the GPU memory. 
-'''
-'''Loading the pre-trained model'''
+'''Last updated on 12/05/2019 15:09''' 
+'''Importing the libraries & setting the configurations'''
 import os
 import sys 
 import keras 
@@ -94,13 +89,13 @@ def bottleneck(inputs, filters, kernel, t, s, r = False):
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     tchannel = K.int_shape(inputs)[channel_axis] * t
     
-    Z1 = conv_block(inputs, tchannel, 1, s, 'same')
+    Z1 = conv_block(inputs, tchannel, 1, 1, 'same')
     
-    Z1 = DepthwiseConv2D(kernel, strides = 1, padding = "same", depth_multiplier = 1, use_bias = False)(Z1)
+    Z1 = DepthwiseConv2D(kernel, strides = s, padding = 'same', depth_multiplier = 1, use_bias = False)(Z1)
     Z1 = BatchNormalization(axis = channel_axis)(Z1)
     A1 = PReLU(shared_axes = [1, 2])(Z1)
     
-    Z2 = Conv2D(filters, 1, strides = 1, padding = "same", use_bias = False)(A1)
+    Z2 = Conv2D(filters, 1, strides = 1, padding = 'same', use_bias = False)(A1)
     Z2 = BatchNormalization(axis = channel_axis)(Z2)
     
     if r:
@@ -121,7 +116,7 @@ def linear_GD_conv_block(inputs, kernel_size, strides):
     
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     
-    Z = DepthwiseConv2D(kernel_size, strides = strides, padding = "valid", depth_multiplier = 1, use_bias = False)(inputs)
+    Z = DepthwiseConv2D(kernel_size, strides = strides, padding = 'valid', depth_multiplier = 1, use_bias = False)(inputs)
     Z = BatchNormalization(axis = channel_axis)(Z)
     
     return Z
@@ -235,12 +230,12 @@ reduce_lr = ReduceLROnPlateau(monitor = 'val_loss', factor = 0.2, patience = 20,
 '''Importing the data & training the model'''
 hist = customed_model.fit_generator(
         train_generator,
-        steps_per_epoch = 2000, # (m * (1 - DATA_SPLIT)) // BATCH_SIZE,
+        steps_per_epoch = 30000, # (m * (1 - DATA_SPLIT)) // BATCH_SIZE,
         epochs = TOTAL_EPOCHS,
         callbacks = [check_pointer, early_stopping, history, csv_logger, reduce_lr], 
         validation_data = validate_generator, 
         validation_steps = (m * DATA_SPLIT) // BATCH_SIZE, 
         workers = 4, 
         use_multiprocessing = True, 
-        initial_epoch = 9)
+        initial_epoch = 13)
 

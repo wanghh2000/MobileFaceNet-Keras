@@ -5,15 +5,15 @@ Created on Thu Apr 25 10:58:15 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 11/12/2019 15:47'''
+'''Last updated on 12/05/2019 15:06'''
 '''Importing the libraries'''
 import os 
 import sys 
 import keras 
-from keras import backend as K
-from keras.models import Model
-from keras.layers import Input, Conv2D, BatchNormalization, PReLU, SeparableConv2D, DepthwiseConv2D, add, Flatten, Dense, Dropout
-from keras.optimizers import Adam
+from keras import backend as K 
+from keras.models import Model 
+from keras.layers import Input, Conv2D, BatchNormalization, PReLU, SeparableConv2D, DepthwiseConv2D, add, Flatten, Dense, Dropout 
+from keras.optimizers import Adam 
 
 sys.path.append('../') 
 from Tools.Keras_custom_layers import ArcFaceLossLayer 
@@ -77,13 +77,13 @@ def bottleneck(inputs, filters, kernel, t, s, r = False):
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     tchannel = K.int_shape(inputs)[channel_axis] * t
     
-    Z1 = conv_block(inputs, tchannel, 1, s, 'same')
+    Z1 = conv_block(inputs, tchannel, 1, 1, 'same')
     
-    Z1 = DepthwiseConv2D(kernel, strides = 1, padding = "same", depth_multiplier = 1, use_bias = False)(Z1)
+    Z1 = DepthwiseConv2D(kernel, strides = s, padding = 'same', depth_multiplier = 1, use_bias = False)(Z1)
     Z1 = BatchNormalization(axis = channel_axis)(Z1)
     A1 = PReLU(shared_axes = [1, 2])(Z1)
     
-    Z2 = Conv2D(filters, 1, strides = 1, padding = "same", use_bias = False)(A1)
+    Z2 = Conv2D(filters, 1, strides = 1, padding = 'same', use_bias = False)(A1)
     Z2 = BatchNormalization(axis = channel_axis)(Z2)
     
     if r:
@@ -104,7 +104,7 @@ def linear_GD_conv_block(inputs, kernel_size, strides):
     
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     
-    Z = DepthwiseConv2D(kernel_size, strides = strides, padding = "valid", depth_multiplier = 1, use_bias = False)(inputs)
+    Z = DepthwiseConv2D(kernel_size, strides = strides, padding = 'valid', depth_multiplier = 1, use_bias = False)(inputs)
     Z = BatchNormalization(axis = channel_axis)(Z)
     
     return Z
