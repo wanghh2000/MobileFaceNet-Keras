@@ -5,7 +5,7 @@ Created on Mon May 13 14:39:29 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 12/10/2019 09:14'''
+'''Last updated on 12/24/2019 11:16'''
 '''Importing the libraries'''
 from keras.models import Model
 from keras.utils import plot_model
@@ -15,7 +15,7 @@ from Model_Structures.MobileFaceNet import mobile_face_net_train
 NUM_LABELS = 67960 
 
 '''Loading the model & re-defining''' 
-model = mobile_face_net_train(NUM_LABELS) 
+model = mobile_face_net_train(NUM_LABELS, loss = 'arcface')  
 model.load_weights('./Models/MobileFaceNet_train.h5') 
 # model.load_weights("E:\\Python_Coding\\MobileFaceNet\\model.hdf5")
 model.summary()

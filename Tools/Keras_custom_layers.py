@@ -5,14 +5,14 @@ Created on Tue Nov 12 13:18:31 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 11/21/2019 13:16'''
+'''Last updated on 11/24/2019 09:30'''
 import math 
 import tensorflow as tf 
 import keras.backend as K 
-from keras import initializers, regularizers, constraints 
+from keras import initializers #, regularizers, constraints 
 from keras.layers import Layer 
-from keras.engine.base_layer import InputSpec 
-from keras.utils.generic_utils import to_list 
+# from keras.engine.base_layer import InputSpec 
+# from keras.utils.generic_utils import to_list 
 
 # Arc Face Loss Layer (Class)
 class ArcFaceLossLayer(Layer):
@@ -59,7 +59,7 @@ class ArcFaceLossLayer(Layer):
         self.W = K.l2_normalize(self.W, axis = 0) # L2 Normalized Weights
         
         # cos(theta + m)
-        cos_theta = K.dot(X_normed, self.W)
+        cos_theta = K.dot(X_normed, self.W) # 矩阵乘法 
         cos_theta2 = K.square(cos_theta)
         sin_theta2 = 1. - cos_theta2
         sin_theta = K.sqrt(sin_theta2 + K.epsilon())
@@ -74,7 +74,8 @@ class ArcFaceLossLayer(Layer):
         cos_tm_temp = tf.where(cond, cos_tm, keep_val)
         
         # mask by label
-        inv_mask = 1. - Y_mask
+        # Y_mask =+ K.epsilon()
+        inv_mask = 1. - Y_mask 
         s_cos_theta = self.s * cos_theta
         
         output = K.softmax((s_cos_theta * inv_mask) + (cos_tm_temp * Y_mask))

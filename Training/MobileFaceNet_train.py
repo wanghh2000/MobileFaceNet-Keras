@@ -5,7 +5,7 @@ Created on Thu Apr 25 10:58:15 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 12/10/2019 09:36'''
+'''Last updated on 12/24/2019 09:45'''
 '''Importing the libraries & setting the configurations'''
 import os 
 import sys 
@@ -30,7 +30,7 @@ train_path = '/data/daiwei/processed_data/datasets_for_face_recognition'
 
 train_datagen = ImageDataGenerator(rescale = 1. / 255, validation_split = DATA_SPLIT)
 
-def mobilefacenet_input_generator(generator, directory, subset):
+def mobilefacenet_input_generator(generator, directory, subset, loss = 'arcface'):
     
     gen = generator.flow_from_directory(
             directory, 
@@ -42,19 +42,22 @@ def mobilefacenet_input_generator(generator, directory, subset):
     
     while True: 
         
-        X = gen.next()
-        yield [X[0], X[1]], X[1] 
+        X = gen.next() 
+        if loss == 'arcface':
+            yield [X[0], X[1]], X[1] 
+        else: 
+            yield X[0], X[1] 
 
-train_generator = mobilefacenet_input_generator(train_datagen, train_path, 'training')
+train_generator = mobilefacenet_input_generator(train_datagen, train_path, 'training', 'softmax')
 
-validate_generator = mobilefacenet_input_generator(train_datagen, train_path, 'validation') 
+validate_generator = mobilefacenet_input_generator(train_datagen, train_path, 'validation', 'softmax') 
 
 '''Training the Model'''
 # Train on multiple GPUs
 # from keras.utils import multi_gpu_model
 # model = multi_gpu_model(model, gpus = 2)
 
-model = mobile_face_net_train(NUM_LABELS) 
+model = mobile_face_net_train(NUM_LABELS, loss = 'softmax') 
 model.summary() 
 model.layers
 
@@ -97,7 +100,6 @@ hist = model.fit_generator(
         validation_data = validate_generator, 
         validation_steps = (m * DATA_SPLIT) // BATCH_SIZE, 
         workers = 4, 
-        use_multiprocessing = True, 
-        initial_epoch = 0)
+        use_multiprocessing = True)
 
 print(hist.history)

@@ -5,7 +5,7 @@ Created on Mon Dec  9 19:55:57 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 12/09/2019 20:03'''
+'''Last updated on 12/24/2019 10:21'''
 '''Importing the libraries''' 
 import sys 
 from keras import backend as K 
@@ -74,7 +74,7 @@ def linear_GD_conv_block(inputs, kernel_size, strides):
     return Z
 
 '''Building the MobileFaceNet Model'''
-def mobile_face_net_train(num_labels):
+def mobile_face_net_train(num_labels, loss = 'arcface'):
     
     X = Input(shape = (112, 112, 3))
     label = Input((num_labels, ))
@@ -99,14 +99,17 @@ def mobile_face_net_train(num_labels):
     # kernel_size = 7 for 112 x 112; 4 for 64 x 64
     
     M = conv_block(M, 128, 1, 1, 'valid')
-    M = Dropout(rate = 0.1)(M)
+    M = Dropout(rate = 0.2)(M)
     M = Flatten()(M)
     
     M = Dense(128, activation = None, use_bias = False, kernel_initializer = 'glorot_normal')(M) 
     
-    Z_L = ArcFaceLossLayer(class_num = num_labels)([M, label])
-    
-    model = Model(inputs = [X, label], outputs = Z_L, name = 'mobile_face_net')
+    if loss == 'arcface': 
+        Y = ArcFaceLossLayer(class_num = num_labels)([M, label]) 
+        model = Model(inputs = [X, label], outputs = Y, name = 'mobile_face_net') 
+    else: 
+        Y = Dense(units = num_labels, activation = 'softmax')(M) 
+        model = Model(inputs = X, outputs = Y, name = 'mobile_face_net') 
     
     return model 
 
