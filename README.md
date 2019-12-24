@@ -18,10 +18,12 @@ Drop the folder
 (4) PS: The OpenCV ops in Python run really slow and all the operations above have a quite similar code implementation in C++. Thus it is recommended to use C++ for prerocessing the image dataset (OpenCV supports reading the Caffe version of MTCNN), as well as to use multi-thread processing.  
 
 ## 2. Training Strategy  
+(1) Train the model with SoftMax loss for pre-training.  
+(2) After the loss becomes lingering around some value, change the loss to ArcFace loss and resume training.  
 The GPU memory is not enough for mini-batch size 512 (as did in the original paper) for training on a Nvidia 2080 Ti, thus I have to downsize it to 128 to fit in the memory.  
   
 ## 3. Improvement for training step in progress.  
-The training data have been finished augmentation. There are 15,090,270 pics of 67,960 identities in the set and I choose 0.005 out of the data for validation during training.   
+The training data have been finished augmentation. There are 15,090,270 pics of 67,960 identities in the set and I choose 0.005 out of the data for validation during training. There might be something wrong with the implementation of the ArcFace loss and I am still trying to fix this.  
 
 ## References  
 (1) Original paper of MobileFaceNet: [MobileFaceNet](https://arxiv.org/abs/1804.07573)  
