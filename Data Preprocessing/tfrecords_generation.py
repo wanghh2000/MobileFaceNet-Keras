@@ -1,63 +1,108 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jul 23 16:44:17 2019
+Created on Sat Mar 21 09:43:44 2020
 
 @author: TMaysGGS
 """
 
-'''Last updated on 07/23/2019 16:48''' 
-import os 
-import cv2 
-import tensorflow as tf 
+"""Last updated on 2020.03.21 13:58"""
+"""Importing the libraries"""
+import os
+import random
+import tensorflow as tf
+import numpy as np
 
-# Transfer data types 
-def _int64_feature(value): 
-    if not isinstance(value, list): 
+"""Building helper functions"""
+def _bytes_feature(value):
+    
+    '''Returns a bytes_list from a string / byte. '''
+    if isinstance(value, type(tf.constant(0))):
+        value = value.numpy() # BytesList will not unpack a string from an EagerTensor. 
+    
+    return tf.train.Feature(bytes_list = tf.train.BytesList(value = [value]))
+
+def _float_feature(value):
+    
+    '''Returns a float_list from a float / double. '''
+    if not isinstance(value, list):
         value = [value]
-    return tf.train.Feature(int64_list = tf.train.Int64List(value = value)) 
+    return tf.train.Feature(float_list = tf.train.FloatList(value = value))
 
-def _float_feature(value): 
-    if not isinstance(value, list): 
-        value = [value] 
-    return tf.train.Feature(float_list = tf.train.FloatList(value = value)) 
+def _int64_feature(value):
+    
+    '''Returns an int64_list from bool / enum / int / uint. '''
+    return tf.train.Feature(int64_list = tf.train.Int64List(value = [value]))
 
-def _bytes_feature(value): 
-    if not isinstance(value, list): 
-        value = [value]
-    return tf.train.Feature(bytes_list = tf.train.BytesList(value = value)) 
+def convert_image_info_to_tfexample(anno):
+    
+    img_path = anno[0]
+    label = int(anno[1])
+    
+    img_string = open(img_path, 'rb').read()
+    img_shape = tf.image.decode_jpeg(img_string).shape
+    
+    feature = {
+            'height': _int64_feature(img_shape[0]),
+            'width': _int64_feature(img_shape[1]),
+            'depth': _int64_feature(img_shape[2]),
+            'label': _int64_feature(label),
+            'image_raw': _bytes_feature(img_string),
+            }
+    
+    return tf.train.Example(features = tf.train.Features(feature = feature))
 
-SRC_PATH = '/data/daiwei/dataset' 
-TFRECORD_PATH = '/data/daiwei/processed_data/MobileFaceNet/training.tfrecords' 
-MAPFILE_PATH = '/data/daiwei/processed_data/MobileFaceNet/traning_classmap.txt' 
+"""Getting the image info"""
+data_dir = r'/data/daiwei/processed_data/datasets_for_face_recognition'
 
-labels = os.listdir(SRC_PATH) 
-class_num = len(labels) 
+label_list = os.listdir(data_dir)
+img_info_list = []
+for label in label_list:
+    img_name_list = os.listdir(os.path.join(data_dir, label))
+    for img_name in img_name_list:
+        img_path = os.path.join(data_dir, label, img_name)
+        img_info_list.append([img_path, label])
+del label, img_name, img_path, label_list, img_name_list
 
-writer = tf.python_io.TFRecordWriter(TFRECORD_PATH) 
-class_map = {} 
-for idx, label in enumerate(labels): 
-    class_path = os.path.join(SRC_PATH, label) 
-    class_map[idx] = label 
-    for img_name in os.listdir(class_path): 
-        
-        # Read the image & preprocess 
-        img_path = os.path.join(class_path, img_name) 
-        
-        img = cv2.imread(img_path) 
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
-        if img.shape[0] != 112 or img.shape[1] != 112: 
-            img = cv2.resize(img, (112, 112), interpolation = cv2.INTER_LINEAR) 
-        
-        # Transfer the image into binary mode 
-        img_str = img.tostring() 
-        example = tf.train.Example(features = tf.train.Features(feature = {
-                'image': _bytes_feature(img_str), 
-                'label': _int64_feature(int(label))
-                })) 
-        writer.write(example.SerializeToString()) 
-writer.close() 
+random.shuffle(img_info_list)
+img_num_per_tfrecord = 100000
+img_info_sections = []
+for i in range(int(np.ceil(len(img_info_list) / img_num_per_tfrecord))):
+    temp_list = img_info_list[i * img_num_per_tfrecord: min((i + 1) * img_num_per_tfrecord, len(img_info_list))]
+    img_info_sections.append(temp_list)
 
-txtfile = open(MAPFILE_PATH, 'w+') 
-for key in class_map.keys(): 
-    txtfile.writelines(str(key) + ":" + class_map[key] + "\n") 
-txtfile.close() 
+"""Writing the images & labels into TFRecord"""
+tfrecord_save_prefix = r'/data/daiwei/processed_data/face_recognition_data_'
+
+for i in range(len(img_info_sections)):
+    tfrecord_save_path = tfrecord_save_prefix + str(i) + r'.tfrecords'
+    with tf.io.TFRecordWriter(tfrecord_save_path) as writer:
+        for anno in img_info_sections[i]:
+            tf_example = convert_image_info_to_tfexample(anno)
+            writer.write(tf_example.SerializeToString())
+
+#"""Reading the images from TFRecord"""
+#import tensorflow as tf
+#import IPython.display as display
+#
+#tfrecord_save_path = r'E:/Datasets/face_recognition_data_4.tfrecords'
+#raw_image_dataset = tf.data.TFRecordDataset(tfrecord_save_path)
+#
+#image_feature_description = {
+#        'height': tf.io.FixedLenFeature([], tf.int64),
+#        'width': tf.io.FixedLenFeature([], tf.int64),
+#        'depth': tf.io.FixedLenFeature([], tf.int64),
+#        'label': tf.io.FixedLenFeature([], tf.int64),
+#        'image_raw': tf.io.FixedLenFeature([], tf.string),
+#        }
+#
+#def _parse_image_function(example_proto):
+#    
+#    return tf.io.parse_single_example(example_proto, image_feature_description)
+#
+#parsed_image_dataset = raw_image_dataset.map(_parse_image_function)
+#
+#for image_feature in parsed_image_dataset:
+#    image_raw = image_feature['image_raw'].numpy()
+#    label = image_feature['label']
+#    display.display(display.Image(data = image_raw))
+#    print(label.numpy())
