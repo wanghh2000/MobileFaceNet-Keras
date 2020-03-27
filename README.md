@@ -1,6 +1,8 @@
 # MobileFaceNet-Keras
 A Keras implementation of MobileFaceNet from [MobileFaceNets: Efficient CNNs for Accurate Real-Time Face Verification on Mobile Devices](https://arxiv.org/abs/1804.07573). It is the 1st time I uploaded my own work. If the license or citation is wrong, please inform me and I will change it ASAP. 
   
+2020.03.27: Modify the implementation of ArcFace loss function and revise the training codes for TensorFlow 2 tf.keras API.  
+  
 ## 1. Data Preprocessing Strategy  
 (1) Use the celebrity & msra datasets from the Trillion Pairs dataset: http://trillionpairs.deepglint.com/data.  
 (2) Set a standard face criterion to align the face & then crop the 112x112 area.  
@@ -24,6 +26,8 @@ The GPU memory is not enough for mini-batch size 512 (as did in the original pap
   
 ## 3. Improvement for training step in progress.  
 The training data have been finished augmentation. There are 15,090,270 pics of 67,960 identities in the set and I choose 0.005 out of the data for validation during training. Now the ArcFace loss has been modified and experimented to be functioning right.   
+To-do list:  
+Make TFRecords for the training data and modify the training codes for using TFRecord with tf.data API.  
 
 ## References  
 (1) Original paper of MobileFaceNet: [MobileFaceNet](https://arxiv.org/abs/1804.07573)  
