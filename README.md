@@ -23,7 +23,7 @@ Drop the folder
 The GPU memory is not enough for mini-batch size 512 (as did in the original paper) for training on a Nvidia 2080 Ti, thus I have to downsize it to 128 to fit in the memory.  
   
 ## 3. Improvement for training step in progress.  
-The training data have been finished augmentation. There are 15,090,270 pics of 67,960 identities in the set and I choose 0.005 out of the data for validation during training. There might be something wrong with the implementation of the ArcFace loss and I am still trying to fix this.  
+The training data have been finished augmentation. There are 15,090,270 pics of 67,960 identities in the set and I choose 0.005 out of the data for validation during training. Now the ArcFace loss has been modified and experimented to be functioning right.   
 
 ## References  
 (1) Original paper of MobileFaceNet: [MobileFaceNet](https://arxiv.org/abs/1804.07573)  
