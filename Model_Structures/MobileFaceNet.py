@@ -5,12 +5,12 @@ Created on Mon Dec  9 19:55:57 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 12/24/2019 10:21'''
+'''Last updated on 2020.03.26 09:18'''
 '''Importing the libraries''' 
 import sys 
-from keras import backend as K 
-from keras.layers import Input, Conv2D, BatchNormalization, PReLU, SeparableConv2D, DepthwiseConv2D, add, Flatten, Dense, Dropout 
-from keras.models import Model 
+from tensorflow.python.keras import backend as K 
+from tensorflow.python.keras.layers import Input, Conv2D, BatchNormalization, PReLU, SeparableConv2D, DepthwiseConv2D, add, Flatten, Dense, Dropout 
+from tensorflow.python.keras.models import Model 
 
 sys.path.append('../') 
 from Tools.Keras_custom_layers import ArcFaceLossLayer 
