@@ -5,33 +5,46 @@ Created on Mon May 13 14:39:29 2019
 @author: TMaysGGS
 """
 
-'''Last updated on 2020.03.27 14:52'''
+'''Last updated on 2020.03.29 03:14'''
 '''Importing the libraries'''
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.utils.vis_utils import plot_model
 
-from Model_Structures.MobileFaceNet import mobile_face_net_train 
+from Model_Structures.MobileFaceNet import mobile_face_net_train, mobile_face_net
 
-NUM_LABELS = 67960 
+NUM_LABELS = 67960
+LOSS_TYPE = 'softmax'
 
-'''Loading the model & re-defining''' 
-model = mobile_face_net_train(NUM_LABELS, loss = 'arcface') 
-model.load_weights('./Models/MobileFaceNet_train.h5') 
-# model.load_weights("E:\\Python_Coding\\MobileFaceNet\\model.hdf5")
+'''Loading the training model'''
+model = mobile_face_net_train(NUM_LABELS, loss = LOSS_TYPE)
+model.load_weights('./Models/MobileFaceNet_train.h5')
 model.summary()
-model.layers 
 
-# Re-define the model
-model.layers.pop() # Remove the ArcFace Loss Layer
-model.layers.pop() # Remove the Label Input Layer
-model.summary() 
-
-model.layers[-1].outbound_nodes = []
-model.outputs = [model.layers[-1].output] # Reset the output
-output = model.get_layer(model.layers[-1].name).output
-model.input
-# The model used for prediction
-pred_model = Model(model.input[0], output)
+pred_model = mobile_face_net()
 pred_model.summary()
-pred_model.save('./Models/MobileFaceNet.h5')
-plot_model(pred_model, to_file = 'pred_model.png')
+
+'''Extracting the weights & transfering to the prediction model'''
+temp_weights_list = []
+for layer in model.layers:
+    
+    if 'dropout' in layer.name:
+        continue
+    temp_layer = model.get_layer(layer.name)
+    temp_weights = temp_layer.get_weights()
+    temp_weights_list.append(temp_weights)
+
+for i in range(len(pred_model.layers)):
+    
+    pred_model.get_layer(pred_model.layers[i].name).set_weights(temp_weights_list[i])
+    
+'''Verifying the results''' 
+import numpy as np
+
+x = np.random.rand(1, 112, 112, 3)
+dense1_layer_model = Model(inputs=model.input, outputs=model.get_layer('dense').output)
+y1 = dense1_layer_model.predict(x)[0]
+y2 = pred_model.predict(x)[0]
+for i in range(128):
+    assert y1[i] == y2[i]
+
+'''Saving the model'''
+pred_model.save(r'./Models/MobileFaceNet_tfkeras.h5')

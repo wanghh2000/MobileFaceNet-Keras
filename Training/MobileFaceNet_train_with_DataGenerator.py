@@ -26,7 +26,7 @@ DATA_SPLIT = 0.005
 TOTAL_EPOCHS = 1000
 
 '''Importing the data set'''
-train_path = '/data/daiwei/processed_data/datasets_for_face_recognition'
+train_path = r'/data/daiwei/processed_data/datasets_for_face_recognition'
 
 train_datagen = ImageDataGenerator(rescale = 1. / 255, validation_split = DATA_SPLIT)
 
@@ -48,9 +48,9 @@ def mobilefacenet_input_generator(generator, directory, subset, loss = 'arcface'
         else: 
             yield X[0], X[1] 
 
-train_generator = mobilefacenet_input_generator(train_datagen, train_path, 'training', 'arcface')
+train_generator = mobilefacenet_input_generator(train_datagen, train_path, 'training', 'softmax')
 
-validate_generator = mobilefacenet_input_generator(train_datagen, train_path, 'validation', 'arcface') 
+validate_generator = mobilefacenet_input_generator(train_datagen, train_path, 'validation', 'softmax')
 
 '''Training the Model'''
 # Train on multiple GPUs

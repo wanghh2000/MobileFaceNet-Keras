@@ -64,7 +64,7 @@ for label in label_list:
 del label, img_name, img_path, label_list, img_name_list
 
 random.shuffle(img_info_list)
-img_num_per_tfrecord = 100000
+img_num_per_tfrecord = 131072
 img_info_sections = []
 for i in range(int(np.ceil(len(img_info_list) / img_num_per_tfrecord))):
     temp_list = img_info_list[i * img_num_per_tfrecord: min((i + 1) * img_num_per_tfrecord, len(img_info_list))]
@@ -74,35 +74,35 @@ for i in range(int(np.ceil(len(img_info_list) / img_num_per_tfrecord))):
 tfrecord_save_prefix = r'/data/daiwei/processed_data/face_recognition_data_'
 
 for i in range(len(img_info_sections)):
-    tfrecord_save_path = tfrecord_save_prefix + str(i) + r'.tfrecords'
+    tfrecord_save_path = tfrecord_save_prefix + str(i) + r'.tfrecord'
     with tf.io.TFRecordWriter(tfrecord_save_path) as writer:
         for anno in img_info_sections[i]:
             tf_example = convert_image_info_to_tfexample(anno)
             writer.write(tf_example.SerializeToString())
 
-#"""Reading the images from TFRecord"""
-#import tensorflow as tf
-#import IPython.display as display
+# """Reading the images from TFRecord"""
+# import tensorflow as tf
+# import IPython.display as display
 #
-#tfrecord_save_path = r'E:/Datasets/face_recognition_data_4.tfrecords'
-#raw_image_dataset = tf.data.TFRecordDataset(tfrecord_save_path)
+# tfrecord_save_path = r'F:\Datasets\data_1.tfrecord'
+# raw_image_dataset = tf.data.TFRecordDataset(tfrecord_save_path)
 #
-#image_feature_description = {
-#        'height': tf.io.FixedLenFeature([], tf.int64),
-#        'width': tf.io.FixedLenFeature([], tf.int64),
-#        'depth': tf.io.FixedLenFeature([], tf.int64),
-#        'label': tf.io.FixedLenFeature([], tf.int64),
-#        'image_raw': tf.io.FixedLenFeature([], tf.string),
-#        }
+# image_feature_description = {
+#         'height': tf.io.FixedLenFeature([], tf.int64),
+#         'width': tf.io.FixedLenFeature([], tf.int64),
+#         'depth': tf.io.FixedLenFeature([], tf.int64),
+#         'label': tf.io.FixedLenFeature([], tf.int64),
+#         'image_raw': tf.io.FixedLenFeature([], tf.string),
+#         }
 #
-#def _parse_image_function(example_proto):
+# def _parse_image_function(example_proto):
 #    
-#    return tf.io.parse_single_example(example_proto, image_feature_description)
+#     return tf.io.parse_single_example(example_proto, image_feature_description)
 #
-#parsed_image_dataset = raw_image_dataset.map(_parse_image_function)
+# parsed_image_dataset = raw_image_dataset.map(_parse_image_function)
 #
-#for image_feature in parsed_image_dataset:
-#    image_raw = image_feature['image_raw'].numpy()
-#    label = image_feature['label']
-#    display.display(display.Image(data = image_raw))
-#    print(label.numpy())
+# for image_feature in parsed_image_dataset:
+#     image_raw = image_feature['image_raw'].numpy()
+#     label = image_feature['label']
+#     display.display(display.Image(data = image_raw))
+#     print(label.numpy())
