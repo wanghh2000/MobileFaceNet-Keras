@@ -28,7 +28,7 @@ The GPU memory is not enough for mini-batch size 512 (as did in the original pap
 ## 3. Improvement for training step in progress.  
 The training data have been finished augmentation. There are 15,090,270 pics of 67,960 identities in the set and I choose 0.005 out of the data for validation during training. Now the ArcFace loss has been modified and experimented to be functioning right.   
 To-do list:  
-Now the multiple TFRecord files are being steamed as a sequence with their name orders and the buffer size is smaller than the total size of image set because of the limit of GPU memory. For exactly randomize the order of images when being trained, the input pipeline should be improved further.  
+Now the multiple TFRecord files are being streamed as a sequence with their name orders and the buffer size is smaller than the total size of image set because of the limit of GPU memory. For exactly randomizing the order of images when being trained, the input pipeline should be improved further.  
 
 ## References  
 (1) Original paper of MobileFaceNet: [MobileFaceNet](https://arxiv.org/abs/1804.07573)  
