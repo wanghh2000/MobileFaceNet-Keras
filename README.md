@@ -42,6 +42,9 @@ python data_preprocessing_cele_win.py
 
 # train
 python MobileFaceNet_train_with_DataGenerator_win.py
+
+# Start tensorboard to visualize
+tensorboard --logdir ./logs
 ```
 
 ## 5. Predict image
