@@ -13,7 +13,8 @@ sys.path.append('../')
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-BATCH_SIZE = 128
+#BATCH_SIZE = 128
+BATCH_SIZE = 4
 # NUM_LABELS = 67960
 NUM_LABELS = 12
 m = 15090270
@@ -60,7 +61,8 @@ model.layers
 model.compile(optimizer=Adam(lr=0.001, epsilon=1e-8), loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Save the model after every epoch
-check_pointer = ModelCheckpoint(filepath='./Models/MobileFaceNet_train.h5', verbose=1, save_best_only=True)
+# set verbose=2 to remove warning on_batch_end() is slow
+check_pointer = ModelCheckpoint(filepath='./Models/MobileFaceNet_train.h5', verbose=2, save_best_only=True)
 
 # Interrupt the training when the validation loss is not decreasing
 early_stopping = EarlyStopping(monitor='val_loss', patience=10000)
