@@ -30,6 +30,22 @@ The training data have been finished augmentation. There are 15,090,270 pics of 
 To-do list:  
 Now the multiple TFRecord files are being streamed as a sequence with their name orders and the buffer size is smaller than the total size of image set because of the limit of GPU memory. For exactly randomizing the order of images when being trained, the input pipeline should be improved further.  
 
+## 4. Training
+
+```
+# install package
+pip install mtcnn
+pip install scikit-image
+
+# data preprocess
+python data_preprocessing_cele_win.py
+
+# train
+python MobileFaceNet_train_with_DataGenerator_win.py
+```
+
+## 5. Predict image
+
 ## References  
 (1) Original paper of MobileFaceNet: [MobileFaceNet](https://arxiv.org/abs/1804.07573)  
 (2) The idea of the implementation of model structure is from MobileNet v2: [xiaochus/MobileNetV2](https://github.com/xiaochus/MobileNetV2)  
