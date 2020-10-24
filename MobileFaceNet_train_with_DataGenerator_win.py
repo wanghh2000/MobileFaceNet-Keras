@@ -99,7 +99,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=200, min_
 
 # TensorBoard
 board = TensorBoard(log_dir='./logs',  # log 目录
-                    histogram_freq=1,
+                    histogram_freq=0,
                     write_graph=True,
                     write_images=True)
                     #histogram_freq=1,  # 按照何等频率（epoch）来计算直方图，0为不计算
@@ -118,6 +118,7 @@ hist = model.fit(
     train_generator,
     steps_per_epoch=int(m * (1 - DATA_SPLIT) / BATCH_SIZE),
     epochs=TOTAL_EPOCHS,
+    #callbacks=[board],
     callbacks=[early_stopping, history, reduce_lr, board],
     #callbacks=[check_pointer, early_stopping, history, csv_logger, reduce_lr, board],
     validation_data=validate_generator,
