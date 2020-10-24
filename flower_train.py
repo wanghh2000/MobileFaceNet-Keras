@@ -7,14 +7,16 @@ from tensorflow.keras.applications import EfficientNetB0, EfficientNetB7
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.applications.efficientnet import preprocess_input
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
+from keras.callbacks import TensorBoard
 
-samples_number = 3252
+train_number = 3252
+val_number = 169
 
 def Preprocessing(directory, input_size, BATCH_SIZE):
     datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         rescale=1/255, 
-        validation_split=0.05)
+        validation_split=0.03)
     traingen = datagen.flow_from_directory(
         directory,
         target_size=input_size,
@@ -55,18 +57,23 @@ def CreateModel(nb_classes, input_size):
 
 def train(model, traingen, valgen, BATCH_SIZE):
     # tensorboard --logdir=logs
-    tbCallBack = TensorBoard(log_dir="logs", histogram_freq=1, write_grads=True, write_images=True)
+    tbCallBack = TensorBoard(
+                    log_dir="logs", 
+                    histogram_freq=1, 
+                    write_grads=True, 
+                    write_images=True)
     # train
     hist = model.fit(traingen,
                     epochs=10,
-                    steps_per_epoch=samples_number/BATCH_SIZE,
+                    steps_per_epoch=train_number/BATCH_SIZE,
                     validation_data=valgen,
+                    validation_steps=val_number/BATCH_SIZE,
                     callbacks=[tbCallBack])
     # the big steps_per_epoch is, the small memory size is used 
     return hist
 
 if __name__ == '__main__':
-    bSize = 1
+    bSize = 2
     path = r'C:/bd_ai/dli/inceptionv4/flower_photos/train'
     traingen, valgen = Preprocessing(directory=path, input_size=(224, 224), BATCH_SIZE=bSize)
     
