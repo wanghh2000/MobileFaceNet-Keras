@@ -76,7 +76,7 @@ def data_clean_and_augmentation(input_path, output_path):
 
     for directory in os.listdir(input_path):
         # directory: label folder name
-        print(directory)
+        # print(directory)
         if os.path.isdir(input_path + directory) and not os.path.exists(output_path + directory):
             # The name list of the images in each label folder
             path_dir = os.listdir(input_path + directory)
@@ -107,8 +107,8 @@ def data_clean_and_augmentation(input_path, output_path):
 
 if __name__ == '__main__':
     #input_path = 'C:/bd_ai/dli/celeba/img_celeba_raw/'
-    input_path = 'C:/bd_ai/dli/facenet/lfw/'
-    output_path = 'C:/bd_ai/dli/celeba/img_celeba_processed/'
+    input_path = 'C:/bd_ai/dli/lfw/'
+    output_path = 'C:/bd_ai/dli/celeba/test/'
     #if not os.path.exists(output_path):
     #    os.makedirs(output_path)
     data_clean_and_augmentation(input_path, output_path)

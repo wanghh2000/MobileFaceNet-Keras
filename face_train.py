@@ -67,9 +67,10 @@ def printModel():
     model.summary()
 
 if __name__ == '__main__':
-    bSize = 8
+    bSize = 4
     path = r'C:/bd_ai/dli/celeba/img_celeba_processed'
-    path = r'C:/bd_ai/dli/celeba/img_celeba_raw'
+    #path = r'C:/bd_ai/dli/celeba/img_celeba_raw'
+    path = r'C:/bd_ai/dli/celeba/test'
     # printModel()
     traingen, valgen = face_generator(directory=path, input_size=(112, 112), BATCH_SIZE=bSize, loss='softmax')
     num_classes = traingen.num_classes
