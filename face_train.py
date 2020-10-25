@@ -10,12 +10,12 @@ from keras.callbacks import TensorBoard
 def face_generator(directory, input_size, BATCH_SIZE, loss='arcface'):
     datagen = ImageDataGenerator(
             rescale=1/255,
-            #rotation_range = 30,
-            #width_shift_range = 0.2,
-            #height_shift_range = 0.2,
-            #shear_range = 0.2,
-            #zoom_range = 0.2,
-            #horizontal_flip = True,
+            rotation_range = 30,
+            width_shift_range = 0.2,
+            height_shift_range = 0.2,
+            shear_range = 0.2,
+            zoom_range = 0.2,
+            horizontal_flip = True,
             validation_split=0.1)
 
     traingen = datagen.flow_from_directory(
