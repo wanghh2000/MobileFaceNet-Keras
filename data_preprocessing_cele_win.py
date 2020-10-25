@@ -88,29 +88,29 @@ def data_clean_and_augmentation(input_path, output_path):
             # nums_of_imgs.append(num_of_imgs)
 
             # if num_of_imgs > 30:
-            if not os.path.exists(output_path + directory):
-                os.makedirs(output_path + directory)
-
+            
             # For each label folder:
             for name in path_dir:
                 img = cv2.imread(input_path + directory + '/' + name)
                 warped_img = face_alignment(img, detector)
                 if warped_img is not None:
+                    if not os.path.exists(output_path + directory):
+                        os.makedirs(output_path + directory)
                     saving_path = output_path + directory + '/' + name
                     #print(saving_path)
                     success = cv2.imwrite(saving_path, warped_img)
                     if not success:
                         raise Exception("img " + name + " saving failed. ")
-                else:
-                    print("img " + input_path + directory +
-                          '/' + name + " no found face")
+                #else:
+                #    print("img " + input_path + directory + '/' + name + " no found face")
 
 
 if __name__ == '__main__':
-    input_path = 'C:/bd_ai/dli/celeba/img_celeba_raw/'
+    #input_path = 'C:/bd_ai/dli/celeba/img_celeba_raw/'
+    input_path = 'C:/bd_ai/dli/facenet/lfw/'
     output_path = 'C:/bd_ai/dli/celeba/img_celeba_processed/'
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
+    #if not os.path.exists(output_path):
+    #    os.makedirs(output_path)
     data_clean_and_augmentation(input_path, output_path)
 
 '''

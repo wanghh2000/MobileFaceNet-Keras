@@ -9,14 +9,18 @@ from tensorflow.keras.applications.efficientnet import preprocess_input
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
 from keras.callbacks import TensorBoard
 
-train_number = 3252
-val_number = 169
 
 def Preprocessing(directory, input_size, BATCH_SIZE):
     datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         rescale=1/255, 
-        validation_split=0.03)
+        rotation_range = 30,
+        width_shift_range = 0.2,
+        height_shift_range = 0.2,
+        shear_range = 0.2,
+        zoom_range = 0.2,
+        horizontal_flip = True,
+        validation_split=0.023)
     traingen = datagen.flow_from_directory(
         directory,
         target_size=input_size,
@@ -32,6 +36,7 @@ def Preprocessing(directory, input_size, BATCH_SIZE):
         batch_size=BATCH_SIZE,
         class_mode='categorical',
         subset='validation')
+    print(traingen.samples, valgen.samples)
     return traingen, valgen
 
 def CreateModel(nb_classes, input_size):
@@ -60,20 +65,22 @@ def train(model, traingen, valgen, BATCH_SIZE):
     tbCallBack = TensorBoard(
                     log_dir="logs", 
                     histogram_freq=1, 
-                    write_grads=True, 
+                    #write_grads=True, 
                     write_images=True)
+    train_number = traingen.samples
+    val_number = valgen.samples
     # train
     hist = model.fit(traingen,
-                    epochs=10,
-                    steps_per_epoch=train_number/BATCH_SIZE,
+                    epochs=20,
+                    steps_per_epoch=int(train_number/BATCH_SIZE),
                     validation_data=valgen,
-                    validation_steps=val_number/BATCH_SIZE,
+                    validation_steps=int(val_number/BATCH_SIZE),
                     callbacks=[tbCallBack])
     # the big steps_per_epoch is, the small memory size is used 
     return hist
 
 if __name__ == '__main__':
-    bSize = 2
+    bSize = 4
     path = r'C:/bd_ai/dli/inceptionv4/flower_photos/train'
     traingen, valgen = Preprocessing(directory=path, input_size=(224, 224), BATCH_SIZE=bSize)
     
