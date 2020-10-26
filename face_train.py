@@ -6,6 +6,9 @@ from Model_Structures.MobileFaceNet import mobile_face_net_train
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.optimizers import Adam
 from keras.callbacks import TensorBoard
+from keras.callbacks import ModelCheckpoint
+from keras.callbacks import EarlyStopping
+from keras.callbacks import ReduceLROnPlateau
 
 def face_generator(directory, input_size, BATCH_SIZE, loss='arcface'):
     datagen = ImageDataGenerator(
@@ -44,6 +47,18 @@ def CreateModel(nb_classes):
     return model
 
 def train(model, traingen, valgen, TOTAL_EPOCHS, BATCH_SIZE):
+    reduce_lr = ReduceLROnPlateau(
+                    monitor='val_loss', 
+                    factor=0.2,
+                    patience=5, 
+                    min_lr=0.001)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=50)
+    chpCallback = ModelCheckpoint(
+                    filepath='./Models/MobileFaceNet_train.h5',
+                    #save_weights_only=True,
+                    monitor='val_accuracy',
+                    mode='max',
+                    save_best_only=True)
     # tensorboard --logdir=logs
     tbCallBack = TensorBoard(
                     log_dir="logs", 
@@ -56,7 +71,7 @@ def train(model, traingen, valgen, TOTAL_EPOCHS, BATCH_SIZE):
         traingen,
         epochs=TOTAL_EPOCHS,
         steps_per_epoch=int(train_number/BATCH_SIZE),
-        callbacks=[tbCallBack],
+        callbacks=[tbCallBack, chpCallback, early_stopping],
         validation_data=valgen,
         validation_steps=int(val_number/BATCH_SIZE),
         workers=1,
@@ -67,7 +82,7 @@ def printModel():
     model.summary()
 
 if __name__ == '__main__':
-    bSize = 4
+    bSize = 8
     path = r'C:/bd_ai/dli/celeba/img_celeba_processed'
     #path = r'C:/bd_ai/dli/celeba/img_celeba_raw'
     path = r'C:/bd_ai/dli/celeba/test'
@@ -76,4 +91,6 @@ if __name__ == '__main__':
     num_classes = traingen.num_classes
     model = CreateModel(nb_classes=num_classes)
     #model.summary()
-    hist = train(model, traingen, valgen, TOTAL_EPOCHS=10, BATCH_SIZE=bSize)
+    hist = train(model, traingen, valgen, TOTAL_EPOCHS=2000, BATCH_SIZE=bSize)
+    output_model_file = 'C:/bd_ai/dli/facenet/mobilefacenet_keras.h5'
+    model.save(output_model_file)
